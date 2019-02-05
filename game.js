@@ -2,15 +2,12 @@ bounce.game = {
     
     obstacles : [],
     objectivs : [],
-    nb_obstacle : null,
-    nb_objectiv:null,
     field:{
-        width : 500,
+        width : 2000,
         height : 2500
     },
-    speed: null,
     player : null,
-    velocity : new THREE.Vector3(),
+    //velocity : new THREE.Vector3(),
     moveForward : null,
 	moveBackward : null,
 	moveLeft :null,
@@ -19,19 +16,21 @@ bounce.game = {
 
   
     build_objectiv : function(objectiv_mesh){
+        const scene = bounce.gfx_engine.scene;
         
         for(let j = 0; j < this.nb_objectiv ; j++){
-
-            
-            objectiv_mesh.scale.set(1,1,1);
-            console.log("test");
-            objectiv_mesh.position.set(
-                Math.floor(Math.random()*this.field.width) - this.field.width*0.5,
-                -70,
-                Math.floor(-Math.random()*this.field.height) + 5
+            const clone_mesh = objectiv_mesh.clone();
+            clone_mesh.scale.set(0.7,0.7,0.7);
+            console.log("test obj");
+            clone_mesh.position.set(
+               // Math.random() * (max - min) + min;
+                Math.floor((Math.random() - 0.5) * 2 * this.field.width/50 - this.field.width/50),
+                Math.floor((Math.random() - 0.5) * 20),
+                Math.floor(-Math.random() * this.field.height/50) + 5
             );
-            scene.add(objectiv_mesh);   
-            this.objectivs.push(objectiv_mesh);
+            console.log(clone_mesh.position);
+            scene.add(clone_mesh);   
+            this.objectivs.push(clone_mesh);
 
         };
         
@@ -41,16 +40,16 @@ bounce.game = {
         
     
             const scene = bounce.gfx_engine.scene;
-            console.log('test');
+            //console.log('test');
             for(let j = 0; j < this.nb_obstacle ; j++){
                
                 let obstacle_clone = obstacle_mesh.clone();
                 obstacle_clone.scale.set(1,1,1);
                 console.log("test");
                 obstacle_clone.position.set(
-                    Math.floor(Math.random()*this.field.width) - this.field.width*0.5,
+                    Math.floor(Math.random()*100) ,
                     -70,
-                    Math.floor(-Math.random()*this.field.height) + 5
+                    Math.floor(-Math.random()*100) + 5
                 );
                 scene.add(obstacle_clone);   
                 this.obstacles.push(obstacle_clone);
@@ -58,24 +57,21 @@ bounce.game = {
         }
     },
         
- 
-
-
     
     init: function(config){
-       
+        const textureLoader = new THREE.MTLLoader();
         const loader = new THREE.OBJLoader();
         const scene = bounce.gfx_engine.scene;
-        const objectiv_geometry = new THREE.RingGeometry( 1, 5, 32 );
-        const objectiv_material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+        const objectiv_geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        const objectiv_material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
         const objectiv_mesh = new THREE.Mesh( objectiv_geometry, objectiv_material );
-        
+        const falcon = null;
         config = config || {};
 
         this.player = bounce.gfx_engine.camera;
         this.speed = config.speed || 10;
         this.gravity = config.gravity || 1;
-        this.nb_tree = config.nb_tree || 50;
+        this.nb_objectiv = config.nb_objectiv || 50;
 
         
        
@@ -83,7 +79,7 @@ bounce.game = {
         //const material = new THREE.MeshBasicMaterial({color : 0xff0000});
             
         // Ground *
-
+        
         const plane = new THREE.Mesh(
             new THREE.PlaneGeometry(this.field.width , this.field.height),
             new THREE.MeshBasicMaterial({color : 0xffff00})
@@ -93,24 +89,47 @@ bounce.game = {
         plane.translateZ(-this.field.height*0.5);
         plane.rotateX(THREE.Math.degToRad(-90));
         plane.receiveShadow = true;
-        bounce.gfx_engine.camera.add(plane);
-        scene.add(plane);
+       // bounce.gfx_engine.camera.add(plane);
+       // scene.add(plane);
 
         //Obstacles 
-        const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-        this.cube = new THREE.Mesh( geometry, material );
-        this.cube.position.set(0,0,-17);
-        this.cube.receiveShadow = true;
-        bounce.gfx_engine.camera.add(this.cube);
-        scene.add(this.cube);
-        console.log(this.cube);
-
-        loader.load('3d_obj/source/big_ast.obj', function (ast) {
         
-            bounce.game.build_obstacle(ast);
+        textureLoader.load('3d_obj/texture/falcon_obj.mtl',function(material){
+             material.preload();
+        
+        loader.setMaterials(material).load("3d_obj/source/falcon_obj.obj",function (object) {
+        
+        
+        object.scale.set(0.01,0.01,0.01);
+        object.position.set(0,0,-17);
+        
+        
+        object.receiveShadow = true;
+        //bounce.gfx_engine.camera.add(this.cube);
+        bounce.game.falcon = object;
+        scene.add(object);
+        })
+    });
+       
+        
+        
+        loader.load('3d_obj/source/big_ast.obj', function (ast) {
+            
+
+               // ast.material = ast_material;
+         
+            
+         
+            bounce.game.build_objectiv(ast);
+            //bounce.game.build_obstacle(ast);
         });
-        bounce.game.build_objectiv(objectiv_mesh);
+        loader.load('3d_obj/source/ast.obj', function (ast) {
+            
+            bounce.game.build_objectiv(ast);
+            //bounce.game.build_obstacle(ast);
+        });
+        //bounce.game.build_obstacle(ast);
+        
         
         const onKeyDown = function ( event ) {
             switch ( event.keyCode ) {
@@ -177,33 +196,35 @@ bounce.game = {
         const gfx = bounce.gfx_engine;
 
         if(bounce.game.moveForward == true){
-            bounce.game.cube.translateZ(-1);
+            bounce.game.falcon.translateZ(-1);
             console.log('test 2');
         }
         if(bounce.game.moveLeft == true){
-            bounce.game.cube.translateX(-1);
+            bounce.game.falcon.translateX(-1);
             console.log('test 2');
         }if(bounce.game.moveBackward == true){
-            bounce.game.cube.translateZ(1);
+            bounce.game.falcon.translateZ(1);
             console.log('test 2');
         }if(bounce.game.moveRight == true){
-            bounce.game.cube.translateX(1);
+            bounce.game.falcon.translateX(1);
             console.log('test 2');
         }
         if(bounce.game.moveUp == true){
-        bounce.game.cube.translateY(1);
+        bounce.game.falcon.translateY(1);
         console.log('test 2');
     };
 
         this.player.translateZ(-this.speed/10);
-        if(this.cube.position.y > 0){
-        this.cube.translateY(-this.gravity/10);
-        }
+        if(bounce.game.falcon.position.y > 0){
+            bounce.game.falcon.translateY(-this.gravity/10);
+            }
+        const raycaster = new THREE.Raycaster();
+        
 
         if(this.obstacles.length > 0){
         
-            for(let i = 0 ; i < this.nb_tree ; i++){
-       
+            for(let i = 0 ; i < this.nb_objectiv ; i++){
+            
             if(this.obstacles[i].position.z > this.player.position.z){
             this.obstacles[i].translateZ(-this.field.width- 50);
             this.obstacles[i].position.x =
@@ -213,15 +234,14 @@ bounce.game = {
             }
         };
         
-
+        //console.log(this.falcon.position);
         if(this.objectivs.length > 0){
         
-            for(let i = 0 ; i < this.nb_tree ; i++){
-       
-            if(this.objectiv[i].position.z > this.player.position.z){
-            this.objectiv[i].translateZ(-this.field.width- 50);
-            this.objectiv[i].position.x =
-            Math.floor(Math.random()*this.field.width) -this.field.width * 0.5;
+            for(let i = 0 ; i < this.objectivs.length ; i++){
+            if(this.objectivs[i].position.z > this.player.position.z){
+            this.objectivs[i].translateZ((-this.field.width- 50)/50);
+            this.objectivs[i].position.x =
+            Math.floor(-(Math.random() - 0.5) * 2 * this.field.height/50) + 5
             
                 };
             }
