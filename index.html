@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bounce.js</title>
+    <style>
+        body{
+            margin : 0;
+            padding : 0;
+            overflow : hidden ; 
+        }
+    </style>
+</head>
+<body>
+
+<!--CHARGEMENT DES MODULES JS-->
+
+
+<script src = "js/three.js"></script>
+<script src = "js/stats.js"></script>
+<script src="js/inflate.min.js"></script>
+<script src="js/FBXLoader.js"></script>
+<script src="js/TGALoader.js"></script>
+<script src ="js/bounce.js"> </script>
+<script src ="js/game.js"></script>
+
+<script src ="js/gfx_engine.js"></script>
+
+<script>
+    
+    bounce.start({
+        debug_mode : true,
+        high_performance : false,
+        gfx_engine : {
+            camera_fov : 50,
+            far_plan:2500
+        },
+        game:{
+        nb_obstacle: 50,
+        speed :1
+        }
+    });
+</script>
+</body>
+</html>
