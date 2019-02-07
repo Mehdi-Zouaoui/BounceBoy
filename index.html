@@ -28,13 +28,13 @@
 
         }
     </style>
+    <a href="#" onClick="bounce.js">More options</a>
 </head>
 <body>
-    <div id = "score">99</div>
-    <script>
-       const score_div = document.getElementById('score')
-       score_div.innerText = 20;
-    </script>
+    <div id ="score">
+        
+    </div>
+    
 <!--CHARGEMENT DES MODULES JS-->
 
 
@@ -61,9 +61,10 @@
         },
         game :{
         nb_obstacle: 2,
-        nb_objectiv: 2,
+        nb_objectiv: 10,
         speed :1,
-        gravity : 3
+        gravity : 3,
+        lives : 3
         }
     });
 </script>
