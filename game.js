@@ -11,15 +11,17 @@ bounce.game = {
     moveForward : null,
 	moveBackward : null,
 	moveLeft :null,
-	moveRight : null,
+    moveRight : null,
+    moveUp : null,
     canJump : null,
-
+    
   
     build_objectiv : function(objectiv_mesh){
         const scene = bounce.gfx_engine.scene;
         
         for(let j = 0; j < this.nb_objectiv ; j++){
-            const clone_mesh = objectiv_mesh.clone();
+
+            const clone_mesh = objectiv_mesh.children[0].clone();
             clone_mesh.scale.set(0.7,0.7,0.7);
             console.log("test obj");
             clone_mesh.position.set(
@@ -61,11 +63,17 @@ bounce.game = {
     init: function(config){
         const textureLoader = new THREE.MTLLoader();
         const loader = new THREE.OBJLoader();
+       
         const scene = bounce.gfx_engine.scene;
-        const objectiv_geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        const objectiv_material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-        const objectiv_mesh = new THREE.Mesh( objectiv_geometry, objectiv_material );
-        const falcon = null;
+       
+       // const objectiv_geometry = new THREE.BoxGeometry( 1, 1, 1 );
+       // const objectiv_material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+        //const objectiv_mesh = new THREE.Mesh( objectiv_geometry, objectiv_material );
+        this.falcon = null;
+       
+        this.direction_ray = new THREE.Vector3(0,0,-1);
+        this.raycaster = new THREE.Raycaster();
+
         config = config || {};
 
         this.player = bounce.gfx_engine.camera;
@@ -94,7 +102,7 @@ bounce.game = {
 
         //Obstacles 
         
-        textureLoader.load('3d_obj/texture/falcon_obj.mtl',function(material){
+        textureLoader.load('3d_obj/textures/falcon_obj.mtl',function(material){
              material.preload();
         
         loader.setMaterials(material).load("3d_obj/source/falcon_obj.obj",function (object) {
@@ -102,7 +110,6 @@ bounce.game = {
         
         object.scale.set(0.01,0.01,0.01);
         object.position.set(0,0,-17);
-        
         
         object.receiveShadow = true;
         //bounce.gfx_engine.camera.add(this.cube);
@@ -190,58 +197,73 @@ bounce.game = {
     console.log('Game is ready')
 
     },
-     
+        
     update : function(){
         
         const gfx = bounce.gfx_engine;
+        const game = bounce.game;
+        let distance = gfx.camera.position.distanceTo(game.falcon.position);
+        console.log(distance);
+        if(game.moveForward == true){
+            if(distance < 100){
+            game.falcon.translateZ(-1);
+            };
+        }
+        if(game.moveLeft == true){
+            game.falcon.translateX(-1);
 
-        if(bounce.game.moveForward == true){
-            bounce.game.falcon.translateZ(-1);
-            console.log('test 2');
+        }if(game.moveBackward == true){
+            game.falcon.translateZ(1);
+            
+        }if(game.moveRight == true){
+            game.falcon.translateX(1);
         }
-        if(bounce.game.moveLeft == true){
-            bounce.game.falcon.translateX(-1);
-            console.log('test 2');
-        }if(bounce.game.moveBackward == true){
-            bounce.game.falcon.translateZ(1);
-            console.log('test 2');
-        }if(bounce.game.moveRight == true){
-            bounce.game.falcon.translateX(1);
-            console.log('test 2');
-        }
-        if(bounce.game.moveUp == true){
-        bounce.game.falcon.translateY(1);
-        console.log('test 2');
+        if(game.moveUp == true){
+            if(game.falcon.position.y < window.innerHeight){
+                game.falcon.translateY(1);
+    
+            
+            }
     };
 
-        this.player.translateZ(-this.speed/10);
-        if(bounce.game.falcon.position.y > 0){
-            bounce.game.falcon.translateY(-this.gravity/10);
+        game.player.translateZ(-game.speed/10);
+        if(game.falcon.position.y > 0){
+            game.falcon.translateY(-game.gravity/10);
             }
-        const raycaster = new THREE.Raycaster();
+        
+                
+        
+        
         
 
         if(this.obstacles.length > 0){
         
             for(let i = 0 ; i < this.nb_objectiv ; i++){
             
-            if(this.obstacles[i].position.z > this.player.position.z){
-            this.obstacles[i].translateZ(-this.field.width- 50);
-            this.obstacles[i].position.x =
-            Math.floor(Math.random()*this.field.width) -this.field.width * 0.5;
+            if(game.obstacles[i].position.z > game.player.position.z){
+            game.obstacles[i].translateZ(-game.field.width- 50);
+            game.obstacles[i].position.x =
+            Math.floor(Math.random()*game.field.width) -game.field.width * 0.5;
             
                 };
             }
         };
         
-        //console.log(this.falcon.position);
-        if(this.objectivs.length > 0){
-        
-            for(let i = 0 ; i < this.objectivs.length ; i++){
-            if(this.objectivs[i].position.z > this.player.position.z){
-            this.objectivs[i].translateZ((-this.field.width- 50)/50);
-            this.objectivs[i].position.x =
-            Math.floor(-(Math.random() - 0.5) * 2 * this.field.height/50) + 5
+        //console.log(bounce.game.falcon.position);
+        if(game.objectivs.length > 0){
+            console.log(game.objectivs);
+            game.raycaster.set(game.falcon.position, game.direction_ray);
+            const intersects = game.raycaster.intersectObjects(game.objectivs, false);
+            console.log(intersects);
+
+
+            for(let i = 0 ; i < game.objectivs.length ; i++){
+
+            
+            if(game.objectivs[i].position.z > game.player.position.z){
+            game.objectivs[i].translateZ((-game.field.width- 50)/50);
+            game.objectivs[i].position.x =
+            Math.floor(-(Math.random() - 0.5) * 2 * game.field.height/50) + 5
             
                 };
             }

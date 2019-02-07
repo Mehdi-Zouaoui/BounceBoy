@@ -15,7 +15,7 @@ bounce.gfx_engine = {
         this.camera = new THREE.PerspectiveCamera(fov,aspect,1,5000);
         this.camera.position.set(0,0,-10);
         this.scene.add(this.camera);
-        this.scene.background = new THREE.TextureLoader().load( '3d_obj/texture/space.jpg' );
+        this.scene.background = new THREE.TextureLoader().load( '3d_obj/textures/space.jpg' );
         this.scene.fog = new THREE.FogExp2( 0xefd1b5, 0.0025 );
         
         //Debug_mode 
